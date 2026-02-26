@@ -109,7 +109,7 @@ def send_rsvp_greeter_email(to_email: str, host_date: str):
 
     html = f"""
     <div style="font-family: Arial, sans-serif; line-height: 1.4;">
-      <p><b>Do you want to host on {host_date}?</b></p>
+      <p><b>Do you want to be greeter on {host_date}?</b></p>
       <p>
         <a href="{yes_link}" style="padding:10px 14px; background:#2e7d32; color:white; text-decoration:none; border-radius:6px;">Yes</a>
         &nbsp;
