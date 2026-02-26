@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask, request, abort
 from dotenv import load_dotenv
 from datetime import date, timedelta
@@ -65,37 +66,53 @@ def rsvp_greeter_reply():
 
 @app.get("/rsvp/host/send")
 def rsvp_host_send():
-    name = request.args.get("name", default='Dexter', type=str)
-    email = request.args.get("email", default='', type=str)
     num_next_sunday = request.args.get("n", default=3, type=int)
-
-    if not email:
-        abort(400, 'no email')
-
-    if not name:
-        abort(400, 'no name')
-
     host_date = next_sunday(date.today(), num_next_sunday).isoformat()
-    send_rsvp_host_email(name, email, host_date)
 
-    return f"<h2>RSVP (host) Send to : {email} on {host_date}</h2>"
+    host_json_path = os.environ["PATH_HOST_LIST_JSON"]
+
+    hosts = get_lists(host_json_path)
+    hosts_email_lists = []
+    for person in hosts:
+        name = person.get("name")
+        email = person.get("email")
+        print(f"Name: {name}, Email: {email}")
+
+        if not email:
+            abort(400, 'no email')
+
+        if not name:
+            abort(400, 'no name')
+
+        hosts_email_lists.append([name, email])
+        send_rsvp_host_email(name, email, host_date)
+
+    return f"<h2>RSVP (host) Send to : {json.dumps(hosts_email_lists)} on {host_date}</h2>"
 
 @app.get("/rsvp/greeter/send")
 def rsvp_greeter_send():
-    name = request.args.get("name", default='Dexter', type=str)
-    email = request.args.get("email", default="", type=str)
     num_next_sunday = request.args.get("n", default=3, type=int)
-
-    if not email:
-        abort(400, 'no email')
-
-    if not name:
-        abort(400, 'no name')
-
     greeter_date = next_sunday(date.today(), num_next_sunday).isoformat()
-    send_rsvp_greeter_email(name, email, greeter_date)
 
-    return f"<h2>RSVP (greeter) Send to : {email} on {greeter_date}</h2>"
+    greeter_json_path = os.environ["PATH_GREETER_LIST_JSON"]
+
+    greeters = get_lists(greeter_json_path)
+    greeters_email_lists = []
+    for person in greeters:
+        name = person.get("name")
+        email = person.get("email")
+        print(f"Name: {name}, Email: {email}")
+
+        if not email:
+            abort(400, 'no email')
+
+        if not name:
+            abort(400, 'no name')
+
+        greeters_email_lists.append([name, email])
+        send_rsvp_greeter_email(name, email, greeter_date)
+
+    return f"<h2>RSVP (greeter) Send to : {json.dumps(greeters_email_lists)} on {greeter_date}</h2>"
 
 def next_sunday(d: date, n: int = 1) -> date:
     """
@@ -112,6 +129,12 @@ def next_sunday(d: date, n: int = 1) -> date:
         days_until_next = 7  # if d is Sunday, "next" means a week later
 
     return d + timedelta(days=days_until_next + 7 * (n - 1))
+
+def get_lists(path: str) -> list:
+    with open(path, "r", encoding="utf-8") as f:
+        people_list = json.load(f)
+
+    return people_list
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8500"))
