@@ -2,7 +2,7 @@ import os
 from mailjet_rest import Client
 from token_util import make_token
 
-def send_rsvp_host_email(to_email: str, host_date: str):
+def send_rsvp_host_email(to_name: str, to_email: str, host_date: str):
     """
     Sends an RSVP email via Mailjet (mailjet_rest).
 
@@ -17,6 +17,7 @@ def send_rsvp_host_email(to_email: str, host_date: str):
     api_secret = os.environ["MAILJET_API_SECRET"]
     from_email = os.environ["FROM_EMAIL"]
     from_name = os.environ.get("FROM_NAME", "")
+    host_template_id = int(os.environ['MAILJET_HOST_TEMPLATE_ID'])
 
     mode = os.environ.get('MODE', "develop")
 
@@ -34,49 +35,18 @@ def send_rsvp_host_email(to_email: str, host_date: str):
 
     subject = f"RSVP needed: Hosting Opportunity for {host_date}"
 
-    html = f"""
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color:#111;">
-      <p style="margin:0 0 12px 0;">Hi there,</p>
-
-      <p style="margin:0 0 12px 0;">
-        We’re confirming the hosting schedule for <b>{host_date}</b>.
-      </p>
-
-      <p style="margin:0 0 16px 0;">
-        Are you available to host on that date?
-      </p>
-
-      <div style="margin:0 0 16px 0;">
-        <a href="{yes_link}"
+    yes_link_html_str = f"""
+    <a href="{yes_link}"
            style="display:inline-block; padding:10px 14px; background:#2e7d32; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
           Yes, I can host
         </a>
-        <span style="display:inline-block; width:10px;"></span>
-        <a href="{no_link}"
+    """
+
+    no_link_html_str = f"""
+    <a href="{no_link}"
            style="display:inline-block; padding:10px 14px; background:#c62828; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
           No, I can’t
         </a>
-      </div>
-
-      <p style="margin:0 0 12px 0; color:#444; font-size:13px;">
-        If the buttons don’t work, you can copy/paste one of these links:
-        <br>
-        Yes: <a href="{yes_link}" style="color:#1a73e8;">{yes_link}</a>
-        <br>
-        No: <a href="{no_link}" style="color:#1a73e8;">{no_link}</a>
-      </p>
-
-      <p style="margin:16px 0 0 0;">
-        Thank you,<br>
-        <span style="color:#444;">HMC Committee team</span>
-      </p>
-
-      <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
-
-      <p style="margin:0; color:#777; font-size:12px;">
-        This is an automated message to confirm availability for the hosting schedule.
-      </p>
-    </div>
     """
 
     mailjet = Client(auth=(api_key, api_secret), version="v3.1")
@@ -87,7 +57,14 @@ def send_rsvp_host_email(to_email: str, host_date: str):
                 "From": {"Email": from_email, **({"Name": from_name} if from_name else {})},
                 "To": [{"Email": to_email}],
                 "Subject": subject,
-                "HTMLPart": html,
+                "TemplateID": host_template_id,
+                "TemplateLanguage": True,
+                "Variables": {
+                    "name": to_name,
+                    "date": host_date,
+                    "yes_link": yes_link_html_str,
+                    "no_link": no_link_html_str
+                }
             }
         ]
     }
@@ -109,7 +86,7 @@ def send_rsvp_host_email(to_email: str, host_date: str):
 
     return result.status_code
 
-def send_rsvp_greeter_email(to_email: str, host_date: str):
+def send_rsvp_greeter_email(to_name: str, to_email: str, host_date: str):
     """
     Sends an RSVP email via Mailjet (mailjet_rest).
 
@@ -124,6 +101,7 @@ def send_rsvp_greeter_email(to_email: str, host_date: str):
     api_secret = os.environ["MAILJET_API_SECRET"]
     from_email = os.environ["FROM_EMAIL"]
     from_name = os.environ.get("FROM_NAME", "")
+    greeter_template_id = int(os.environ['MAILJET_GREETER_TEMPLATE_ID'])
 
     mode = os.environ.get('MODE', "develop")
 
@@ -141,50 +119,19 @@ def send_rsvp_greeter_email(to_email: str, host_date: str):
 
     subject = f"RSVP needed: Greeter Opportunity for {host_date}"
 
-    html = f"""
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color:#111;">
-      <p style="margin:0 0 12px 0;">Hi there,</p>
-
-      <p style="margin:0 0 12px 0;">
-        We’re confirming the greeter schedule for <b>{host_date}</b>.
-      </p>
-
-      <p style="margin:0 0 16px 0;">
-        Are you available to serve as a greeter on that date?
-      </p>
-
-      <div style="margin:0 0 16px 0;">
+    yes_link_html_str = f"""
         <a href="{yes_link}"
-           style="display:inline-block; padding:10px 14px; background:#2e7d32; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
-          Yes, I can greet
-        </a>
-        <span style="display:inline-block; width:10px;"></span>
+               style="display:inline-block; padding:10px 14px; background:#2e7d32; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
+              Yes, I can host
+            </a>
+        """
+
+    no_link_html_str = f"""
         <a href="{no_link}"
-           style="display:inline-block; padding:10px 14px; background:#c62828; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
-          No, I can’t
-        </a>
-      </div>
-
-      <p style="margin:0 0 12px 0; color:#444; font-size:13px;">
-        If the buttons don’t work, copy/paste a link:
-        <br>
-        Yes: <a href="{yes_link}" style="color:#1a73e8;">{yes_link}</a>
-        <br>
-        No: <a href="{no_link}" style="color:#1a73e8;">{no_link}</a>
-      </p>
-
-      <p style="margin:16px 0 0 0;">
-        Thank you,<br>
-        <span style="color:#444;">Reshift Media Team</span>
-      </p>
-
-      <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
-
-      <p style="margin:0; color:#777; font-size:12px;">
-        This is an automated message to confirm availability for the greeter schedule.
-      </p>
-    </div>
-    """
+               style="display:inline-block; padding:10px 14px; background:#c62828; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
+              No, I can’t
+            </a>
+        """
 
     mailjet = Client(auth=(api_key, api_secret), version="v3.1")
 
@@ -194,7 +141,14 @@ def send_rsvp_greeter_email(to_email: str, host_date: str):
                 "From": {"Email": from_email, **({"Name": from_name} if from_name else {})},
                 "To": [{"Email": to_email}],
                 "Subject": subject,
-                "HTMLPart": html,
+                "TemplateID": greeter_template_id,
+                "TemplateLanguage": True,
+                "Variables": {
+                    "name": to_name,
+                    "date": host_date,
+                    "yes_link": yes_link_html_str,
+                    "no_link": no_link_html_str
+                }
             }
         ]
     }
