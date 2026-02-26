@@ -32,15 +32,49 @@ def send_rsvp_host_email(to_email: str, host_date: str):
     yes_link = f"{base_url}/rsvp/host/reply?token={token}&answer=yes"
     no_link  = f"{base_url}/rsvp/host/reply?token={token}&answer=no"
 
-    subject = f"RSVP: Do you want to host on {host_date}?"
+    subject = f"RSVP needed: Hosting Opportunity for {host_date}"
 
     html = f"""
-    <div style="font-family: Arial, sans-serif; line-height: 1.4;">
-      <p><b>Do you want to host on {host_date}?</b></p>
-      <p>
-        <a href="{yes_link}" style="padding:10px 14px; background:#2e7d32; color:white; text-decoration:none; border-radius:6px;">Yes</a>
-        &nbsp;
-        <a href="{no_link}" style="padding:10px 14px; background:#c62828; color:white; text-decoration:none; border-radius:6px;">No</a>
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color:#111;">
+      <p style="margin:0 0 12px 0;">Hi there,</p>
+
+      <p style="margin:0 0 12px 0;">
+        We’re confirming the hosting schedule for <b>{host_date}</b>.
+      </p>
+
+      <p style="margin:0 0 16px 0;">
+        Are you available to host on that date?
+      </p>
+
+      <div style="margin:0 0 16px 0;">
+        <a href="{yes_link}"
+           style="display:inline-block; padding:10px 14px; background:#2e7d32; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
+          Yes, I can host
+        </a>
+        <span style="display:inline-block; width:10px;"></span>
+        <a href="{no_link}"
+           style="display:inline-block; padding:10px 14px; background:#c62828; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
+          No, I can’t
+        </a>
+      </div>
+
+      <p style="margin:0 0 12px 0; color:#444; font-size:13px;">
+        If the buttons don’t work, you can copy/paste one of these links:
+        <br>
+        Yes: <a href="{yes_link}" style="color:#1a73e8;">{yes_link}</a>
+        <br>
+        No: <a href="{no_link}" style="color:#1a73e8;">{no_link}</a>
+      </p>
+
+      <p style="margin:16px 0 0 0;">
+        Thank you,<br>
+        <span style="color:#444;">HMC Committee team</span>
+      </p>
+
+      <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+
+      <p style="margin:0; color:#777; font-size:12px;">
+        This is an automated message to confirm availability for the hosting schedule.
       </p>
     </div>
     """
@@ -105,15 +139,49 @@ def send_rsvp_greeter_email(to_email: str, host_date: str):
     yes_link = f"{base_url}/rsvp/greeter/reply?token={token}&answer=yes"
     no_link  = f"{base_url}/rsvp/greeter/reply?token={token}&answer=no"
 
-    subject = f"RSVP: Do you want to be greeter on {host_date}?"
+    subject = f"RSVP needed: Greeter Opportunity for {host_date}"
 
     html = f"""
-    <div style="font-family: Arial, sans-serif; line-height: 1.4;">
-      <p><b>Do you want to be greeter on {host_date}?</b></p>
-      <p>
-        <a href="{yes_link}" style="padding:10px 14px; background:#2e7d32; color:white; text-decoration:none; border-radius:6px;">Yes</a>
-        &nbsp;
-        <a href="{no_link}" style="padding:10px 14px; background:#c62828; color:white; text-decoration:none; border-radius:6px;">No</a>
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color:#111;">
+      <p style="margin:0 0 12px 0;">Hi there,</p>
+
+      <p style="margin:0 0 12px 0;">
+        We’re confirming the greeter schedule for <b>{host_date}</b>.
+      </p>
+
+      <p style="margin:0 0 16px 0;">
+        Are you available to serve as a greeter on that date?
+      </p>
+
+      <div style="margin:0 0 16px 0;">
+        <a href="{yes_link}"
+           style="display:inline-block; padding:10px 14px; background:#2e7d32; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
+          Yes, I can greet
+        </a>
+        <span style="display:inline-block; width:10px;"></span>
+        <a href="{no_link}"
+           style="display:inline-block; padding:10px 14px; background:#c62828; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
+          No, I can’t
+        </a>
+      </div>
+
+      <p style="margin:0 0 12px 0; color:#444; font-size:13px;">
+        If the buttons don’t work, copy/paste a link:
+        <br>
+        Yes: <a href="{yes_link}" style="color:#1a73e8;">{yes_link}</a>
+        <br>
+        No: <a href="{no_link}" style="color:#1a73e8;">{no_link}</a>
+      </p>
+
+      <p style="margin:16px 0 0 0;">
+        Thank you,<br>
+        <span style="color:#444;">Reshift Media Team</span>
+      </p>
+
+      <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+
+      <p style="margin:0; color:#777; font-size:12px;">
+        This is an automated message to confirm availability for the greeter schedule.
       </p>
     </div>
     """
