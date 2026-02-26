@@ -17,7 +17,12 @@ def send_rsvp_host_email(to_email: str, host_date: str):
     api_secret = os.environ["MAILJET_API_SECRET"]
     from_email = os.environ["FROM_EMAIL"]
     from_name = os.environ.get("FROM_NAME", "")
-    base_url = os.environ["BASE_URL"].rstrip("/")
+
+    mode = os.environ.get('MODE', "develop")
+
+    base_url = os.environ["BASE_URL_DEVELOP"].rstrip("/")
+    if mode == 'production':
+        base_url = os.environ["BASE_URL_PRODUCTION"].rstrip("/")
 
     token = make_token({
         "email": to_email,
@@ -85,7 +90,12 @@ def send_rsvp_greeter_email(to_email: str, host_date: str):
     api_secret = os.environ["MAILJET_API_SECRET"]
     from_email = os.environ["FROM_EMAIL"]
     from_name = os.environ.get("FROM_NAME", "")
-    base_url = os.environ["BASE_URL"].rstrip("/")
+
+    mode = os.environ.get('MODE', "develop")
+
+    base_url = os.environ["BASE_URL_DEVELOP"].rstrip("/")
+    if mode == 'production':
+        base_url = os.environ["BASE_URL_PRODUCTION"].rstrip("/")
 
     token = make_token({
         "email": to_email,

@@ -65,17 +65,25 @@ def rsvp_greeter_reply():
 
 @app.get("/rsvp/host/send")
 def rsvp_host_send():
+    email = request.args.get("email", "")
+    num_next_sunday = request.args.get("num_next_sunday", 3)
 
-    email = 'wuwenhuang@gmail.com'
-    host_date = next_sunday(date.today(), 3).isoformat()
+    if not email:
+        abort(400, 'no email')
+
+    host_date = next_sunday(date.today(), num_next_sunday).isoformat()
     send_rsvp_host_email(email, host_date)
 
     return f"<h2>RSVP (host) Send to : {email} on {host_date}</h2>"
 
 @app.get("/rsvp/greeter/send")
 def rsvp_greeter_send():
+    email = request.args.get("email", "")
+    num_next_sunday = request.args.get("num_next_sunday", 3)
 
-    email = 'wuwenhuang@gmail.com'
+    if not email:
+        abort(400, 'no email')
+
     greeter_date = next_sunday(date.today(), 3).isoformat()
     send_rsvp_greeter_email(email, greeter_date)
 
