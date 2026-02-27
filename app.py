@@ -85,7 +85,14 @@ def rsvp_host_send():
             abort(400, 'no name')
 
         hosts_email_lists.append([name, email])
-        send_rsvp_host_email(name, email, host_date)
+        result = send_rsvp_host_email(name, email, host_date)
+        if not result["ok"]:
+            # show a useful error on the page
+            return (
+                f"<h2>Failed sending RSVP (host) to {email} on {host_date}</h2>"
+                f"<pre>{json.dumps(result, indent=2, default=str)}</pre>",
+                500 if result.get("kind") == "exception" else 502,
+            )
 
     return f"<h2>RSVP (host) Send to : {json.dumps(hosts_email_lists)} on {host_date}</h2>"
 
@@ -110,7 +117,14 @@ def rsvp_greeter_send():
             abort(400, 'no name')
 
         greeters_email_lists.append([name, email])
-        send_rsvp_greeter_email(name, email, greeter_date)
+        result = send_rsvp_greeter_email(name, email, greeter_date)
+        if not result["ok"]:
+            # show a useful error on the page
+            return (
+                f"<h2>Failed sending RSVP (greeter) to {email} on {greeter_date}</h2>"
+                f"<pre>{json.dumps(result, indent=2, default=str)}</pre>",
+                500 if result.get("kind") == "exception" else 502,
+            )
 
     return f"<h2>RSVP (greeter) Send to : {json.dumps(greeters_email_lists)} on {greeter_date}</h2>"
 

@@ -1,5 +1,4 @@
 import os
-from flask import jsonify
 from mailjet_rest import Client
 from token_util import make_token
 
@@ -14,8 +13,6 @@ def send_rsvp_host_email(to_name: str, to_email: str, host_date: str):
       - BASE_URL
       - (optional) FROM_NAME
     """
-    api_key = os.environ["MAILJET_API_KEY"]
-    api_secret = os.environ["MAILJET_API_SECRET"]
     from_email = os.environ["FROM_EMAIL"]
     from_name = os.environ.get("FROM_NAME", "")
     host_template_id = int(os.environ['MAILJET_HOST_TEMPLATE_ID'])
@@ -50,8 +47,6 @@ def send_rsvp_host_email(to_name: str, to_email: str, host_date: str):
         </a>
     """
 
-    mailjet = Client(auth=(api_key, api_secret), version="v3.1")
-
     payload = {
         "Messages": [
             {
@@ -70,28 +65,7 @@ def send_rsvp_host_email(to_name: str, to_email: str, host_date: str):
         ]
     }
 
-    # If you want debug output (don’t print secrets in prod)
-    # print(payload)
-
-    try:
-        # ... your Mailjet send code here ...
-        result = mailjet.send.create(data=payload)  # example
-
-        # If Mailjet returned error but no exception:
-        if result.status_code >= 400:
-            return jsonify({
-                "error": "mailjet_error",
-                "status": result.status_code,
-                "details": getattr(result, "json", lambda: result.text)()
-            }), 502
-
-        return jsonify({"msg": "success", "data": result.json()}), 200
-
-    except Exception as e:
-        return jsonify({
-            "error": "internal_server_error",
-            "details": str(e)
-        }), 500
+    return send_message(payload=payload)
 
 def send_rsvp_greeter_email(to_name: str, to_email: str, host_date: str):
     """
@@ -104,8 +78,6 @@ def send_rsvp_greeter_email(to_name: str, to_email: str, host_date: str):
       - BASE_URL
       - (optional) FROM_NAME
     """
-    api_key = os.environ["MAILJET_API_KEY"]
-    api_secret = os.environ["MAILJET_API_SECRET"]
     from_email = os.environ["FROM_EMAIL"]
     from_name = os.environ.get("FROM_NAME", "")
     greeter_template_id = int(os.environ['MAILJET_GREETER_TEMPLATE_ID'])
@@ -140,7 +112,7 @@ def send_rsvp_greeter_email(to_name: str, to_email: str, host_date: str):
             </a>
         """
 
-    mailjet = Client(auth=(api_key, api_secret), version="v3.1")
+
 
     payload = {
         "Messages": [
@@ -160,25 +132,42 @@ def send_rsvp_greeter_email(to_name: str, to_email: str, host_date: str):
         ]
     }
 
-    # If you want debug output (don’t print secrets in prod)
-    # print(payload)
+    return send_message(payload=payload)
 
+def send_message(payload):
     try:
-        # ... your Mailjet send code here ...
-        result = mailjet.send.create(data=payload)  # example
+        api_key = os.environ["MAILJET_API_KEY"]
+        api_secret = os.environ["MAILJET_API_SECRET"]
 
-        # If Mailjet returned error but no exception:
-        if result.status_code >= 400:
-            return jsonify({
-                "error": "mailjet_error",
-                "status": result.status_code,
-                "details": getattr(result, "json", lambda: result.text)()
-            }), 502
+        mailjet = Client(auth=(api_key, api_secret), version="v3.1")
+        result = mailjet.send.create(data=payload)
 
-        return jsonify({"msg": "success", "data": result.json()}), 200
+        # mailjet_rest response usually has .status_code and .json()
+        status = getattr(result, "status_code", 0)
+
+        body = None
+        try:
+            body = result.json()
+        except Exception:
+            body = getattr(result, "text", None)
+
+        if status >= 400:
+            return {
+                "ok": False,
+                "kind": "mailjet_error",
+                "status_code": status,
+                "response": body,
+            }
+
+        return {
+            "ok": True,
+            "status_code": status,
+            "response": body,
+        }
 
     except Exception as e:
-        return jsonify({
-            "error": "internal_server_error",
-            "details": str(e)
-        }), 500
+        return {
+            "ok": False,
+            "kind": "exception",
+            "error": str(e),
+        }
