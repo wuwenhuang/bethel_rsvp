@@ -101,7 +101,7 @@ def send_rsvp_greeter_email(to_name: str, to_email: str, host_date: str):
     yes_link_html_str = f"""
         <a href="{yes_link}"
                style="display:inline-block; padding:10px 14px; background:#2e7d32; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:700;">
-              Yes, I can host
+              Yes, I can greet
             </a>
         """
 
