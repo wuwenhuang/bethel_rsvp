@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
 from dotenv import load_dotenv
 from datetime import date, timedelta
 
@@ -139,3 +139,11 @@ def get_lists(path: str) -> list:
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8500"))
     app.run(host="0.0.0.0", port=port, debug=True)
+
+@app.errorhandler(400)
+def handle_400(e):
+    return jsonify(error=str(e.description)), 400
+
+@app.errorhandler(500)
+def handle_500(e):
+    return jsonify(error=str(e.description)), 500
