@@ -1,4 +1,5 @@
 import os
+from flask import jsonify
 from mailjet_rest import Client
 from token_util import make_token
 
@@ -72,19 +73,25 @@ def send_rsvp_host_email(to_name: str, to_email: str, host_date: str):
     # If you want debug output (don’t print secrets in prod)
     # print(payload)
 
-    result = mailjet.send.create(data=payload)
+    try:
+        # ... your Mailjet send code here ...
+        result = mailjet.send.create(data=payload)  # example
 
-    # Mailjet returns a Response-like object; safest is to check status_code + json
-    if result.status_code >= 400:
-        try:
-            print("MAILJET ERROR status:", result.status_code)
-            print("MAILJET ERROR body:", result.json())
-        except Exception:
-            print("MAILJET ERROR status:", result.status_code)
-            print("MAILJET ERROR text:", getattr(result, "text", None))
-        result.raise_for_status()
+        # If Mailjet returned error but no exception:
+        if result.status_code >= 400:
+            return jsonify({
+                "error": "mailjet_error",
+                "status": result.status_code,
+                "details": getattr(result, "json", lambda: result.text)()
+            }), 502
 
-    return result.status_code
+        return jsonify({"msg": "success", "data": result.json()}), 200
+
+    except Exception as e:
+        return jsonify({
+            "error": "internal_server_error",
+            "details": str(e)
+        }), 500
 
 def send_rsvp_greeter_email(to_name: str, to_email: str, host_date: str):
     """
@@ -156,16 +163,22 @@ def send_rsvp_greeter_email(to_name: str, to_email: str, host_date: str):
     # If you want debug output (don’t print secrets in prod)
     # print(payload)
 
-    result = mailjet.send.create(data=payload)
+    try:
+        # ... your Mailjet send code here ...
+        result = mailjet.send.create(data=payload)  # example
 
-    # Mailjet returns a Response-like object; safest is to check status_code + json
-    if result.status_code >= 400:
-        try:
-            print("MAILJET ERROR status:", result.status_code)
-            print("MAILJET ERROR body:", result.json())
-        except Exception:
-            print("MAILJET ERROR status:", result.status_code)
-            print("MAILJET ERROR text:", getattr(result, "text", None))
-        result.raise_for_status()
+        # If Mailjet returned error but no exception:
+        if result.status_code >= 400:
+            return jsonify({
+                "error": "mailjet_error",
+                "status": result.status_code,
+                "details": getattr(result, "json", lambda: result.text)()
+            }), 502
 
-    return result.status_code
+        return jsonify({"msg": "success", "data": result.json()}), 200
+
+    except Exception as e:
+        return jsonify({
+            "error": "internal_server_error",
+            "details": str(e)
+        }), 500
