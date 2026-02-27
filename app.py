@@ -1,5 +1,6 @@
-import os
+import os, hmac
 import json
+from functools import wraps
 from flask import Flask, request, abort, jsonify
 from dotenv import load_dotenv
 from datetime import date, timedelta
@@ -9,8 +10,26 @@ from token_util import read_token
 from sheets import upsert_response
 
 load_dotenv()
-
 app = Flask(__name__)
+
+def require_bearer(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        expected = os.getenv("API_BEARER_TOKEN")
+        if not expected:
+            abort(500, description="Server missing API_BEARER_TOKEN")
+
+        auth = request.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            abort(401, description="Missing Bearer token")
+
+        token = auth.split(" ", 1)[1].strip()
+
+        if not hmac.compare_digest(token, expected):
+            abort(403, description="Invalid token")
+
+        return f(*args, **kwargs)
+    return wrapper
 
 @app.get("/")
 def home():
@@ -64,9 +83,11 @@ def rsvp_greeter_reply():
 
     return f"<h2>Recorded: {answer.upper()} for {host_date}</h2>"
 
-@app.get("/rsvp/host/send")
+@app.post("/rsvp/host/send")
+@require_bearer
 def rsvp_host_send():
-    num_next_sunday = request.args.get("n", default=3, type=int)
+    data = request.get_json()
+    num_next_sunday = data.get("n", 3)
     host_date = next_sunday(date.today(), num_next_sunday).isoformat()
 
     host_json_path = os.environ["PATH_HOST_LIST_JSON"]
@@ -96,9 +117,11 @@ def rsvp_host_send():
 
     return f"<h2>RSVP (host) Send to : {json.dumps(hosts_email_lists)} on {host_date}</h2>"
 
-@app.get("/rsvp/greeter/send")
+@app.post("/rsvp/greeter/send")
+@require_bearer
 def rsvp_greeter_send():
-    num_next_sunday = request.args.get("n", default=3, type=int)
+    data = request.get_json()
+    num_next_sunday = data.get("n", 3)
     greeter_date = next_sunday(date.today(), num_next_sunday).isoformat()
 
     greeter_json_path = os.environ["PATH_GREETER_LIST_JSON"]
